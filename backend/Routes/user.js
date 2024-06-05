@@ -18,7 +18,8 @@ router.post("/signup",signupmiddleware,async (req,res)=>{
 try {
 const user = await new User({FirstName,lastName,username,password})
 user.save()
-const token = jwt.sign({username:username}, secretkey)
+const userId = user._id
+const token = jwt.sign({userId}, secretkey)
 
 res.status(200).json({
 	message: "User created successfully",
@@ -32,31 +33,33 @@ res.status(200).json({
 router.post("/signin",signinmiddleware,async (req,res)=>{
     const username = req.body.username
     const password = req.body.password
-    const token = jwt.sign({username:username}, secretkey)
-    try {
-       const check = await User.findOne({username,password})
-       if (check) {
+    
+       const user = await User.findOne({username,password})
+    
+        
+       if (user) {
+        const token = jwt.sign({userId: user._id}, secretkey)
         res.status(200).json(
             {
-                token: "jwt"
+                token: token
             })
        }
         else{ res.send(
             {
                 message: "Error while logging in"
             })}
-        } catch (error) {
-            res.status(411).json(error)
-        }
+        
         
 
 })
 
 router.put("/update",updatemiddleware,authmiddleware,async(req,res)=>{
+    
 try {
-    await User.updateOne(req.body,{
+    await User.updateOne({
+        
     _id:req.userId
-})
+},req.body)
 res.json({
     message: "Updated successfully"
 })
