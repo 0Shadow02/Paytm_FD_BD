@@ -1,7 +1,8 @@
 const { Router } = require("express");
 const { User } = require("../DataBase/db");
-const { signupmiddleware, signinmiddleware } = require("../Inputvalidation/inputval");
+const { signupmiddleware, signinmiddleware, updatemiddleware } = require("../Inputvalidation/inputval");
 const { jwt, secretkey } = require("../config");
+const { authmiddleware } = require("../authmiddleware/middleware.");
 const router = Router()
 
 
@@ -19,30 +20,50 @@ const user = await new User({FirstName,lastName,username,password})
 user.save()
 const token = jwt.sign({username:username}, secretkey)
 
-res.status(200).json("user created successfully"+" " +" userId:" +token)
+res.status(200).json({
+	message: "User created successfully",
+	token: token
+})
 } catch (error) {
-    res.status(401).json(error)
+    res.status(411).json(error)
 }
 })
 
 router.post("/signin",signinmiddleware,async (req,res)=>{
     const username = req.body.username
     const password = req.body.password
-    
+    const token = jwt.sign({username:username}, secretkey)
     try {
        const check = await User.findOne({username,password})
        if (check) {
-        res.status(200).json("signin successfully")
+        res.status(200).json(
+            {
+                token: "jwt"
+            })
        }
-        else{ res.send("User does not exist")}
+        else{ res.send(
+            {
+                message: "Error while logging in"
+            })}
         } catch (error) {
-            res.status(401).json("there some error")
+            res.status(411).json(error)
         }
         
 
 })
 
-router.post("/update",()=>{
+router.put("/update",updatemiddleware,authmiddleware,async(req,res)=>{
+try {
+    await User.updateOne(req.body,{
+    _id:req.userId
+})
+res.json({
+    message: "Updated successfully"
+})
+} catch (error) {
+    res.json(error)
+}
+
 
 })
 

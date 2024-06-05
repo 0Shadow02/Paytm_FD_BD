@@ -8,6 +8,12 @@ username: zod.string().email(),
 password: zod.string().regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!%*?&])[A-Za-z\d$@$!%*?&]{8,}$/)
     
 })
+const updateSchema = zod.object({
+FirstName: zod.string().optional(),
+lastName:zod.string().optional(),
+password: zod.string().regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!%*?&])[A-Za-z\d$@$!%*?&]{8,}$/).optional()
+    
+})
 
 async function signupmiddleware(req,res,next){
     
@@ -24,10 +30,12 @@ async function signupmiddleware(req,res,next){
        
        }
        else{
-        res.send("User already exist")}
+        res.send({
+            message: "Email already taken "
+        })}
     }
     else{
-        res.send("wrong inputs")
+        res.send("Incorrect inputs")
     }
 }
 function signinmiddleware(req,res,next){
@@ -42,7 +50,18 @@ function signinmiddleware(req,res,next){
        next()
     }
     else{
-        res.send("wrong inputs")
+        res.send("Incorrect inputs")
     }
 }
-module.exports = {signinmiddleware,signupmiddleware}
+function updatemiddleware(req,res,next){
+    const check = updateSchema.safeParse(req.body)
+    if(!check.success){
+        res.status(411).json({
+            message: "Error while updating information"
+        })
+    
+    }
+else{
+        next()    
+        }}
+module.exports = {signinmiddleware,signupmiddleware,updatemiddleware}
