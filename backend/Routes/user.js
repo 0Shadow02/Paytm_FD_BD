@@ -70,4 +70,32 @@ res.json({
 
 })
 
+
+
+
+
+router.get("/bulk", async (req, res) => {
+    const filter = req.query.filter || "";
+
+    const users = await User.find({
+        $or: [{
+            FirstName: {
+                "$regex": filter
+            }
+        }, {
+            lastName: {
+                "$regex": filter
+            }
+        }]
+    })
+
+    res.json({
+        user: users.map(user => ({
+            
+            firstName: user.FirstName,
+            lastName: user.lastName,
+            _id: user._id
+        }))
+    })
+})
 module.exports = router;
