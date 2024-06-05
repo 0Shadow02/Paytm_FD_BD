@@ -20,7 +20,7 @@ const user = await new User({FirstName,lastName,username,password})
 user.save()
 const userId = user._id
 const token = jwt.sign({userId}, secretkey)
-
+console.log(token)
 res.status(200).json({
 	message: "User created successfully",
 	token: token
