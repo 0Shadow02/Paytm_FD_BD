@@ -19,6 +19,7 @@ const accountSchema = mongoose.Schema({
     default: 0,
   }
 })
-module.exports = {User}
+const Account = mongoose.model("Account",accountSchema)
+module.exports = {User,Account}
 
 

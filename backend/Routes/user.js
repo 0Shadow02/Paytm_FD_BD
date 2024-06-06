@@ -1,5 +1,5 @@
 const { Router } = require("express");
-const { User } = require("../DataBase/db");
+const { User, Account } = require("../DataBase/db");
 const { signupmiddleware, signinmiddleware, updatemiddleware } = require("../Inputvalidation/inputval");
 const { jwt, secretkey } = require("../config");
 const { authmiddleware } = require("../authmiddleware/middleware.");
@@ -18,6 +18,8 @@ router.post("/signup",signupmiddleware,async (req,res)=>{
 try {
 const user = await new User({FirstName,lastName,username,password})
 user.save()
+const account= await new Account({userId:user._id,balance: 1+ Math.random()*10000})
+account.save()
 const userId = user._id
 const token = jwt.sign({userId}, secretkey)
 
