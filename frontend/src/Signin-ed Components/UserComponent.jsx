@@ -1,27 +1,36 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "../components/ButtonComponent";
 import { SendMoney } from "./SendMoney";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 
 export const Users = () => {
     // Replace with backend call
    
-    const [users, setUsers] = useState([{
-        firstName: "Ryuji",
-        lastName: "Azuma",
-        _id: 1
-    }]);
-
+    const [users, setUsers] = useState([]);
+    const [filter, setfilter] = useState("");
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await axios.get("http://localhost:3000/api/v1/user/bulk?filter=" +filter);
+                setUsers(response.data.user);
+            } catch (error) {
+                console.error("Error fetching data: ", error);
+            }
+        };
+        
+        fetchData();
+    }, [filter]);
     return <>
         <div className="font-bold mt-6 text-lg">
             Users
         </div>
         <div className="my-2">
-            <input type="text" placeholder="Search users..." className="w-full px-2 py-1 border rounded border-slate-200"></input>
+            <input onChange={e=> setfilter(e.target.value)} type="text" placeholder="Search users..." className="w-full px-2 py-1 border rounded border-slate-200"></input>
         </div>
         <div>
-            {users.map(user => <User user={user} />)}
+             {users.map(user => <User user={user} />)}
         </div>
     </>
 }
@@ -43,7 +52,11 @@ function User({user}) {
         </div>
 
         <div className="flex flex-col justify-center h-ful">
-            <Button label={"Send Money"} onClick={()=>{navigate('/send')}}/>
+            <Button label={"Send Money"}  onClick={()=>{navigate("/send?id="+ user._id + "&name=" +user.firstName)}}/>
+         
+            
+
+      
             
         </div>
     </div>
