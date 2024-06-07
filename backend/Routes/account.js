@@ -14,6 +14,7 @@ router.get('/balance',authmiddleware,async (req,res)=>{
     res.json({balance:account.balance})
 })
 
+// Good Method using (uses txns in db)
 router.post('/transfer',authmiddleware,async(req,res)=>{
     const session = await mongoose.startSession();
     session.startTransaction()
@@ -26,7 +27,7 @@ router.post('/transfer',authmiddleware,async(req,res)=>{
             message: "Insufficient balance"
         });
     }
-    const toaccount= await User.findOne({username:totransfer}).session(session)
+    const toaccount= await User.findOne({_id:totransfer}).session(session)
    
     if (!toaccount) {
         await session.abortTransaction()
@@ -36,7 +37,7 @@ router.post('/transfer',authmiddleware,async(req,res)=>{
     }
 
     await Account.updateOne({userId:req.userId},{$inc:{balance: -amount}}).session(session)
-    await Account.updateOne({userId:toaccount._id},{$inc:{balance:  amount}}).session(session)
+    await Account.updateOne({userId:totransfer},{$inc:{balance:  amount}}).session(session)
 
     await session.commitTransaction();
     res.status(200).json({
@@ -46,6 +47,8 @@ router.post('/transfer',authmiddleware,async(req,res)=>{
 
 })
 
+
+//  Bad method:
 // router.post('/transfer',authmiddleware,async(req,res)=>{
 //     const auth = req.headers.authorization
 //     const amount = req.body.amount
@@ -84,35 +87,6 @@ router.post('/transfer',authmiddleware,async(req,res)=>{
 // })
 
 
-
-
-
-
-
-
-
-
-
-
-
-// accrouter.get("/account",async(req,res,next)=>{
-
-//     const user= await  User.find({})
-//     const account= await Account.findOne({userId:"66601563b1d99f3325db01be"})
-  
-// //    user.map(async(users)=>{
-// //     const account= await Account.findOne({userId:users._id})
-// //     res.json({
-// //         FirstName:users.FirstName,
-// //         userId:users._id,
-// //         // balance: account.balance
-// //     })
-   
-    
-// //    })
-
-// res.json(account)
-// })
 
 
 module.exports = router;

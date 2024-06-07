@@ -8,6 +8,11 @@ username: zod.string().email(),
 password: zod.string().regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!%*?&])[A-Za-z\d$@$!%*?&]{8,}$/)
     
 })
+const signinSchema = zod.object({
+username: zod.string().email(),
+password: zod.string().regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!%*?&])[A-Za-z\d$@$!%*?&]{8,}$/)
+    
+})
 const updateSchema = zod.object({
 FirstName: zod.string().optional(),
 lastName:zod.string().optional(),
@@ -40,11 +45,10 @@ async function signupmiddleware(req,res,next){
 }
 function signinmiddleware(req,res,next){
     
-    const FirstName = req.body.FirstName
-    const lastName = req.body.lastName
+   
     const username = req.body.username
     const password = req.body.password
-    const payload = Schema.safeParse({FirstName,lastName,username,password})
+    const payload = signinSchema.safeParse({username,password})
     if (payload.success) {
       
        next()
